@@ -1,0 +1,19 @@
+{
+  "required": true,
+  "package": "com.mememan.blitz.mixins",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "overwrites": {
+    "requireAnnotations": true
+  },
+  "mixinextras": {
+    "minVersion": "${mixinextras_version}"
+  },
+  "client": [
+    "client.GameRendererMixin"
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "blitz.config.save": "Save & Exit",
+  "blitz.config.save.description": "Saves the current config and exits the config screen. Press [ESC] to discard changes.",
+  "blitz.config.title": "Blitz Config",
+  "creative_mode_tab.blitz.items": "Blitz: Items",
+  "item.blitz.ore_sonar": "Ore Sonar",
+  "item.blitz.rubble_hammer": "Rubble Hammer"
+}

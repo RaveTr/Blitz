@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "id": "${mod_id}",
+  "version": "${mod_version}",
+  "name": "${mod_name}",
+  "description": "${mod_description}",
+  "authors": [
+    "${mod_authors}"
+  ],
+  "contact": {
+    "homepage": "${homepage_url}",
+    "sources": "${source_code_url}",
+    "issues": "${issue_tracker_url}"
+  },
+  "accessWidener" : "${mod_id}.accessWidener",
+  "license": "${mod_license}",
+  "icon": "${mod_icon_path}",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "${fabric_common_entrypoint}"
+    ],
+    "client": [
+      "${fabric_client_entrypoint}"
+    ],
+    "modmenu": [
+      "${fabric_modmenu_entrypoint}"
+    ]
+  },
+  "mixins": [
+    "${mod_id}.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": "${fabric_loader_version_range}",
+    "fabric": "${fabric_api_version_range}",
+    "minecraft": "${minecraft_version_range}",
+    "nexus": "${nexus_version_range}",
+    "java": ">=17"
+  },
+  "suggests": {
+    "modmenu": "${modmenu_version_range}"
+  },
+  "custom": {
+    "modmenu": {
+      "links": {
+        "Discord": "https://discord.gg/5tEGhRfDtf"
+      },
+      "update_checker": true
+    }
+  }
+}

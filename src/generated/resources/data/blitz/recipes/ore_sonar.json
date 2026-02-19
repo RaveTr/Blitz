@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "E": {
+      "item": "minecraft:echo_shard"
+    },
+    "R": {
+      "item": "minecraft:redstone"
+    },
+    "S": {
+      "item": "minecraft:calibrated_sculk_sensor"
+    }
+  },
+  "pattern": [
+    "ERE",
+    "RSR",
+    "ERE"
+  ],
+  "result": {
+    "item": "blitz:ore_sonar"
+  },
+  "show_notification": true
+}

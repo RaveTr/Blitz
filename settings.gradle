@@ -1,0 +1,22 @@
+pluginManagement {
+	repositories {
+        mavenCentral()
+        gradlePluginPortal()
+
+		maven {
+			name = "Fabric MC"
+			url = "https://maven.fabricmc.net/"
+		}
+
+        maven {
+            name = "Parchment MC"
+            url = "https://maven.parchmentmc.org"
+        }
+	}
+}
+
+plugins {
+    id("org.gradle.toolchains.foojay-resolver-convention") version("1.0.0")
+}
+
+rootProject.name = "Blitz"
