@@ -9,6 +9,13 @@ Oneshot content mod that adds an ore sonar, rubble hammer, ..., and a quick litt
 - <b>Bossfight (Krailix):</b> A mini-bossfight against a dexterous boxer. Inspired by [Wally](https://ippo.fandom.com/wiki/Wally) from Hajime No Ippo, Krailix is a nimble outboxer that specializes in countering attacks and stacking chip damage to enemies.
 - Integration with the <b>Mod Menu</b> mod (adds in-game config for all otherwise datapack-able options, as well as some extra client-side configs).
 
+# Installation Instructions
+
+## Dependencies
+
+- Requires Fabric API v0.92.7+1.20.1 or above - [CurseForge](https://www.curseforge.com/minecraft/mc-mods/fabric-api/files/7472801) | [Modrinth](https://modrinth.com/mod/fabric-api/version/0.92.7+1.20.1)
+- Requires Nexus API v1.0.9 or above - [CurseForge](https://www.curseforge.com/minecraft/mc-mods/nexus-api/files/7429537) | [Modrinth](https://modrinth.com/mod/nexus-api/version/1.0.9)
+
 # Trivia
 
 - <b>Krailix</b> is inspired by [Wally](https://ippo.fandom.com/wiki/Wally) from Hajime No Ippo and [Freedom](https://untitled-boxing-games.fandom.com/wiki/Untitled_boxing_game%27s_Wiki) from Untitled Boxing Game, though some of his mechanics and visuals slightly differ (e.g. his Whirlwind stance is actually based on [Chronos](https://untitled-boxing-games.fandom.com/wiki/Chronos_Style) from Untitled Boxing Game, which is based on [Itagaki](https://ippo.fandom.com/wiki/Manabu_Itagaki) from Hajime No Ippo).
