@@ -13,6 +13,11 @@ public final class BlitzLocalizationTemplates { // TODO Nexus v1.1.0 already sup
             .withAdditionalLocalizationKey("blitz.config.title", "Blitz Config")
             .withAdditionalLocalizationKey("blitz.config.save", "Save & Exit")
             .withAdditionalLocalizationKey("blitz.config.save.description", "Saves the current config and exits the config screen. Press [ESC] to discard changes.")
+            .withAdditionalLocalizationKey("blitz.config.reset", "R")
+            .withAdditionalLocalizationKey("blitz.config.reset.description", "Resets all config keys to their default values.")
             .withAdditionalLocalizationKey("blitz.config.reset_value", "Reset this config key to its default value.")
+            .withAdditionalLocalizationKey("config.blitz.min_val_option", "%s - %s [Min]")
+            .withAdditionalLocalizationKey("config.blitz.max_val_option", "%s - %s [Max]")
+            .withAdditionalLocalizationKey("config.blitz.standard_val_option", "%s - %s")
             .buildAndGet();
 }

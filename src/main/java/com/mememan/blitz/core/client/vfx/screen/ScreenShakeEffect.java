@@ -18,7 +18,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  * @see GameRendererMixin
  */
 public record ScreenShakeEffect(ShakeData data) {
-    private static final ConcurrentLinkedQueue<ScreenShakeEffect> SHAKES = new ConcurrentLinkedQueue<>();
+    private static final ConcurrentLinkedQueue<ScreenShakeEffect> SHAKES = new ConcurrentLinkedQueue<>(); // Just convenient for internal method use; this'll only ever be mutated on the client anyway
 
     public ScreenShakeEffect(BlockPos originPos, double range, float magnitude, float duration, float fadeOut) {
         this(new ShakeData(originPos, range, magnitude, duration, fadeOut));

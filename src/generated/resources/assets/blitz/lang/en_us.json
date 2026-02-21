@@ -1,7 +1,13 @@
 {
+  "blitz.config.reset": "R",
+  "blitz.config.reset.description": "Resets all config keys to their default values.",
+  "blitz.config.reset_value": "Reset this config key to its default value.",
   "blitz.config.save": "Save & Exit",
   "blitz.config.save.description": "Saves the current config and exits the config screen. Press [ESC] to discard changes.",
   "blitz.config.title": "Blitz Config",
+  "config.blitz.max_val_option": "%s - %s [Max]",
+  "config.blitz.min_val_option": "%s - %s [Min]",
+  "config.blitz.standard_val_option": "%s - %s",
   "creative_mode_tab.blitz.items": "Blitz: Items",
   "item.blitz.ore_sonar": "Ore Sonar",
   "item.blitz.rubble_hammer": "Rubble Hammer"

@@ -8,9 +8,11 @@ import com.google.gson.JsonPrimitive;
 import com.mememan.blitz.Blitz;
 import com.mememan.nexus.loader.ModSide;
 import com.mememan.nexus.platform.NexusServices;
+import com.mememan.nexus.util.StringUtil;
 import it.unimi.dsi.fastutil.Hash;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectOpenCustomHashSet;
+import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
@@ -44,9 +46,12 @@ public final class JsonConfig {
     // Config Values
     public static final ConfigValue ENABLE_SCREEN_SHAKE = registerClientConfigValue("enable_screen_shake", new JsonPrimitive(true), "Whether or not screen shake should be enabled (only really present when using the Ore Sonar at the moment).");
 
-    public static final ConfigValue ORE_SONAR_SCAN_RADIUS = registerConfigValue("ore_sonar_scan_radius", new JsonPrimitive(1024), "The radius (in blocks) in which the Ore Sonar should scan for ores.");
-    public static final ConfigValue RUBBLE_HAMMER_MINING_RADIUS = registerConfigValue("rubble_hammer_mining_radius", new JsonPrimitive(1), "The radius (in blocks) around the center block being mined by the Rubble Hammer that should be destroyed.");
-    public static final ConfigValue RUBBLE_HAMMER_MINING_DEPTH = registerConfigValue("rubble_hammer_mining_depth", new JsonPrimitive(1), "The depth (in blocks) from the center block being mined by the Rubble Hammer (relative to the direction in which the mining entity/player is looking) that should be destroyed.");
+    public static final ConfigValue ORE_SONAR_SCAN_RADIUS = registerConfigValue("ore_sonar_scan_radius", new JsonPrimitive(1024), "The radius (in blocks) in which the Ore Sonar should scan for ores.", 10.0D, 2048.0D);
+    public static final ConfigValue ORE_SONAR_SCAN_LIMIT = registerConfigValue("ore_sonar_scan_limit", new JsonPrimitive(512), "The maximum number of ores that the Ore Sonar should scan for.", 10.0D, 1024.0D);
+    public static final ConfigValue ORE_SONAR_COOLDOWN = registerConfigValue("ore_sonar_cooldown", new JsonPrimitive(100), "The cooldown (in ticks) for the Ore Sonar.", 20.0D, 10000.0D);
+
+    public static final ConfigValue RUBBLE_HAMMER_MINING_RADIUS = registerConfigValue("rubble_hammer_mining_radius", new JsonPrimitive(1), "The radius (in blocks) around the center block being mined by the Rubble Hammer that should be destroyed.", 0.0D, 16.0D);
+    public static final ConfigValue RUBBLE_HAMMER_MINING_DEPTH = registerConfigValue("rubble_hammer_mining_depth", new JsonPrimitive(1), "The depth (in blocks) from the center block being mined by the Rubble Hammer (relative to the direction in which the mining entity/player is looking) that should be destroyed.", 0.0D, 16.0D);
 
     private JsonConfig() {
 
@@ -54,11 +59,20 @@ public final class JsonConfig {
 
     public static void initializeConfig() {
         checkAndWriteDefaultConfig();
-        loadConfigFromDisk();
     }
 
     public static void reloadConfig() {
         updateConfigFromMemory();
+
+        saveConfigToDisk();
+        loadConfigFromDisk();
+        writeConfigFromDisk();
+    }
+
+    public static void resetConfig() {
+        CURRENT_CONFIG_VALUES.clear();
+
+        writeConfigFromMemory(true);
 
         saveConfigToDisk();
         loadConfigFromDisk();
@@ -73,21 +87,24 @@ public final class JsonConfig {
         if (CONFIG_JSON == null) CONFIG_JSON = new JsonObject();
 
         if (!CONFIG_FILE.exists()) {
-            writeConfigFromMemory();
+            writeConfigFromMemory(false);
             saveConfigToDisk();
         } else {
+            appendMissingConfigValues();
             loadConfigFromDisk();
             writeConfigFromDisk();
         }
     }
 
-    private static void writeConfigFromMemory() {
+    private static void writeConfigFromMemory(boolean setDefault) {
         CONFIG_VALUES_BY_SIDE.forEach((logicalSide, configValues) -> {
             if (!NexusServices.PLATFORM_MANAGER.getEnvironmentSide().pertainsTo(logicalSide)) return; // Avoid writing config configValues to the CONFIG_JSON and storing them in CURRENT_CONFIG_VALUES
 
             configValues.forEach(configValue -> {
                 if (configValue != null) {
-                    configValue.serializeTo(CONFIG_JSON);
+                    if (setDefault) configValue.currentValue = configValue.defaultValue;
+
+                    configValue.serializeTo(CONFIG_JSON, setDefault);
                     CURRENT_CONFIG_VALUES.add(configValue);
                 }
             });
@@ -102,16 +119,30 @@ public final class JsonConfig {
                 CURRENT_CONFIG_VALUES.add(new ConfigValue(
                         configEntry.getKey(), // Name/Key
                         configEntry.getValue().getAsJsonObject().get("value").getAsJsonPrimitive(),
-                        configEntry.getValue().getAsJsonObject().get("description").getAsString())
-                );
+                        configEntry.getValue().getAsJsonObject().get("description").getAsString(),
+                        configEntry.getValue().getAsJsonObject().has("min") ? configEntry.getValue().getAsJsonObject().get("min").getAsDouble() : null,
+                        configEntry.getValue().getAsJsonObject().has("max") ? configEntry.getValue().getAsJsonObject().get("max").getAsDouble() : null
+                ));
             });
         }
     }
 
+    private static void appendMissingConfigValues() {
+        CONFIG_VALUES_BY_SIDE.forEach((logicalSide, configValues) -> {
+            if (!NexusServices.PLATFORM_MANAGER.getEnvironmentSide().pertainsTo(logicalSide)) return;
+
+            configValues.forEach(configValue -> {
+                if (!CONFIG_JSON.has(configValue.getValueName())) {
+                    configValue.serializeTo(CONFIG_JSON, false);
+                }
+            });
+        });
+    }
+
     private static void updateConfigFromMemory() {
         CURRENT_CONFIG_VALUES.forEach(configValue -> {
-            if (!CONFIG_JSON.has(configValue.getValueName()) || !CONFIG_JSON.get(configValue.getValueName()).getAsJsonObject().get("value").getAsJsonPrimitive().equals(configValue.get())) {
-                configValue.serializeTo(CONFIG_JSON);
+            if (!CONFIG_JSON.has(configValue.getValueName()) || !CONFIG_JSON.get(configValue.getValueName()).getAsJsonObject().get("value").getAsJsonPrimitive().equals(configValue.currentValue)) {
+                configValue.serializeTo(CONFIG_JSON, true);
             }
         });
     }
@@ -132,24 +163,32 @@ public final class JsonConfig {
         }
     }
 
-    private static ConfigValue registerConfigValue(String valueName, JsonPrimitive defaultValue, @Nullable String description) {
-        return registerConfigValue(valueName, defaultValue, description, ModSide.COMMON);
+    private static ConfigValue registerConfigValue(String valueName, JsonPrimitive defaultValue, @Nullable String description, Double min, Double max) {
+        return registerConfigValue(valueName, defaultValue, description, min, max, ModSide.COMMON);
     }
 
-    private static ConfigValue registerConfigValue(String valueName, JsonPrimitive defaultValue) {
-        return registerConfigValue(valueName, defaultValue, null);
+    private static ConfigValue registerConfigValue(String valueName, JsonPrimitive defaultValue, @Nullable String description) {
+        return registerConfigValue(valueName, defaultValue, description, null, null);
+    }
+
+    private static ConfigValue registerServerConfigValue(String valueName, JsonPrimitive defaultValue, @Nullable String description, Double min, Double max) {
+        return registerConfigValue(valueName, defaultValue, description, min, max, ModSide.SERVER);
     }
 
     private static ConfigValue registerServerConfigValue(String valueName, JsonPrimitive defaultValue, @Nullable String description) {
-        return registerConfigValue(valueName, defaultValue, description, ModSide.SERVER);
+        return registerServerConfigValue(valueName, defaultValue, description, null, null);
     }
 
     private static ConfigValue registerServerConfigValue(String valueName, JsonPrimitive defaultValue) {
         return registerServerConfigValue(valueName, defaultValue, null);
     }
 
+    private static ConfigValue registerClientConfigValue(String valueName, JsonPrimitive defaultValue, @Nullable String description, Double min, Double max) {
+        return registerConfigValue(valueName, defaultValue, description, min, max, ModSide.CLIENT);
+    }
+
     private static ConfigValue registerClientConfigValue(String valueName, JsonPrimitive defaultValue, @Nullable String description) {
-        return registerConfigValue(valueName, defaultValue, description, ModSide.CLIENT);
+        return registerClientConfigValue(valueName, defaultValue, description, null, null);
     }
 
     private static ConfigValue registerClientConfigValue(String valueName, JsonPrimitive defaultValue) {
@@ -157,7 +196,11 @@ public final class JsonConfig {
     }
 
     private static ConfigValue registerConfigValue(String valueName, JsonPrimitive defaultValue, @Nullable String description, ModSide logicalSide) {
-        ConfigValue configValueToRegister = new ConfigValue(valueName, defaultValue, description);
+        return registerConfigValue(valueName, defaultValue, description, null, null, logicalSide);
+    }
+
+    private static ConfigValue registerConfigValue(String valueName, JsonPrimitive defaultValue, @Nullable String description, Double min, Double max, ModSide logicalSide) {
+        ConfigValue configValueToRegister = new ConfigValue(valueName, defaultValue, description, min, max);
 
         CONFIG_VALUES_BY_SIDE.computeIfAbsent(logicalSide, k -> new ObjectArrayList<>()).add(configValueToRegister);
 
@@ -174,31 +217,57 @@ public final class JsonConfig {
         @Nullable
         protected final String description;
         protected JsonPrimitive currentValue;
+        protected final Double min;
+        protected final Double max;
 
         public ConfigValue(String valueName, JsonPrimitive defaultValue, @Nullable String description) {
+            this(valueName, defaultValue, description, null, null);
+        }
+
+        public ConfigValue(String valueName, JsonPrimitive defaultValue, @Nullable String description, Double min, Double max) {
             this.valueName = valueName;
             this.defaultValue = defaultValue;
             this.description = description;
+            this.min = min;
+            this.max = max;
         }
 
         @Override
         public JsonPrimitive get() {
-            return (currentValue = CONFIG_JSON.has(valueName) ? CONFIG_JSON.get(valueName).getAsJsonObject().get("value").getAsJsonPrimitive() : defaultValue) == null
+            return (currentValue = computeValue()) == null
                     ? (currentValue = defaultValue)
                     : currentValue;
         }
 
-        public void serializeTo(JsonObject configFileJson) {
+        protected JsonPrimitive computeValue() {
+            if (CONFIG_JSON.has(valueName)) {
+                JsonPrimitive retrievedValue = CONFIG_JSON.get(valueName).getAsJsonObject().get("value").getAsJsonPrimitive();
+
+                if (retrievedValue.isNumber() && min != null && max != null) retrievedValue = new JsonPrimitive(Mth.clamp(retrievedValue.getAsDouble(), min, max));
+
+                return retrievedValue;
+            } else return defaultValue;
+        }
+
+        public void serializeTo(JsonObject configFileJson, boolean fromUpdatedConfigInMemory) {
             JsonObject valueJson = configFileJson.has(valueName) ? configFileJson.get(valueName).getAsJsonObject() : new JsonObject();
 
-            valueJson.add("value", get());
+            valueJson.add("value", fromUpdatedConfigInMemory ? Optional.ofNullable(currentValue).orElse(get()) : get());
             valueJson.addProperty("description", description == null ? "No description provided." : description);
 
+            if (getDefaultValue().isNumber() && min != null) valueJson.addProperty("min", min);
+            if (getDefaultValue().isNumber() && max != null) valueJson.addProperty("max", max);
+
             configFileJson.add(valueName, valueJson);
+            int a = 0;
         }
 
         public String getValueName() {
             return valueName;
+        }
+
+        public String getFormattedValueName() {
+            return StringUtil.toTitleCase(valueName);
         }
 
         public JsonPrimitive getDefaultValue() {
@@ -210,11 +279,21 @@ public final class JsonConfig {
             return description;
         }
 
+        @Nullable
+        public Double getMin() {
+            return min;
+        }
+
+        @Nullable
+        public Double getMax() {
+            return max;
+        }
+
         @Override
         public boolean equals(Object obj) {
             if (!(obj instanceof ConfigValue other)) return false;
 
-            return Objects.equals(valueName, other.valueName) && Objects.equals(defaultValue, other.defaultValue) && Objects.equals(currentValue, other.currentValue);
+            return Objects.equals(valueName, other.valueName) && Objects.equals(defaultValue, other.defaultValue) && Objects.equals(currentValue, other.currentValue) && Objects.equals(min, other.min) && Objects.equals(max, other.max);
         }
     }
 }
