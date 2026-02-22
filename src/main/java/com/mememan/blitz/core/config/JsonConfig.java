@@ -46,8 +46,8 @@ public final class JsonConfig {
     // Config Values
     public static final ConfigValue ENABLE_SCREEN_SHAKE = registerClientConfigValue("enable_screen_shake", new JsonPrimitive(true), "Whether or not screen shake should be enabled (only really present when using the Ore Sonar at the moment).");
 
-    public static final ConfigValue ORE_SONAR_SCAN_RADIUS = registerConfigValue("ore_sonar_scan_radius", new JsonPrimitive(32), "The radius (in blocks, relative to scanning pos) in which the Ore Sonar should scan for ores.", 10.0D, 2048.0D);
-    public static final ConfigValue ORE_SONAR_SCAN_LIMIT = registerConfigValue("ore_sonar_scan_limit", new JsonPrimitive(512), "The maximum number of ores that the Ore Sonar should scan for.", 10.0D, 1024.0D);
+    public static final ConfigValue ORE_SONAR_SCAN_RADIUS = registerConfigValue("ore_sonar_scan_radius", new JsonPrimitive(32), "The radius (in blocks, relative to scanning pos) in which the Ore Sonar should scan for ores.", 10.0D, 1024.0D);
+    public static final ConfigValue ORE_SONAR_SCAN_LIMIT = registerConfigValue("ore_sonar_scan_limit", new JsonPrimitive(512), "The maximum number of ores that the Ore Sonar should scan for.", 10.0D, 4096.0D);
     public static final ConfigValue ORE_SONAR_COOLDOWN = registerConfigValue("ore_sonar_cooldown", new JsonPrimitive(100), "The cooldown (in ticks) for the Ore Sonar.", 20.0D, 10000.0D);
 
     public static final ConfigValue RUBBLE_HAMMER_MINING_RADIUS = registerConfigValue("rubble_hammer_mining_radius", new JsonPrimitive(1), "The radius (in blocks) around the center block being mined by the Rubble Hammer that should be destroyed.", 0.0D, 16.0D);

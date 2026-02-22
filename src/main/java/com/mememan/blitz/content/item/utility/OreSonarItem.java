@@ -7,19 +7,24 @@ import it.unimi.dsi.fastutil.Hash;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenCustomHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Comparator;
 import java.util.LinkedList;
@@ -83,6 +88,44 @@ public class OreSonarItem extends Item {
         }
 
         return InteractionResultHolder.pass(heldStack);
+    }
+
+    @Override
+    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag isAdvanced) {
+        super.appendHoverText(stack, level, tooltipComponents, isAdvanced);
+
+        if (level != null && level.isClientSide()) { // JIC
+            if (Screen.hasShiftDown() || Screen.hasControlDown()) { // Fancy ahh tooltip (I lowk found some cool chars to use and pasted them here)
+                tooltipComponents.add(Component.literal("━━━━━━━━━━━━━━━━━━━━━━━━━━━━").withStyle(ChatFormatting.DARK_GRAY));
+                tooltipComponents.add(Component.literal("⚡ ").withStyle(ChatFormatting.AQUA, ChatFormatting.BOLD)
+                        .append(Component.translatable("tooltip.blitz.ore_sonar_stats").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD)));
+                tooltipComponents.add(Component.literal("━━━━━━━━━━━━━━━━━━━━━━━━━━━━").withStyle(ChatFormatting.DARK_GRAY));
+
+                tooltipComponents.add(Component.literal("  ◆ ").withStyle(ChatFormatting.DARK_AQUA)
+                        .append(Component.translatable("tooltip.blitz.ore_sonar_scan_radius").withStyle(ChatFormatting.AQUA))
+                        .append(Component.literal(": ").withStyle(ChatFormatting.GRAY))
+                        .append(Component.literal(String.valueOf(JsonConfig.ORE_SONAR_SCAN_RADIUS.get().getAsInt())).withStyle(ChatFormatting.AQUA, ChatFormatting.BOLD))
+                        .append(Component.literal(" blocks").withStyle(ChatFormatting.DARK_AQUA)));
+
+                tooltipComponents.add(Component.literal("  ◆ ").withStyle(ChatFormatting.DARK_RED)
+                        .append(Component.translatable("tooltip.blitz.ore_sonar_scan_limit").withStyle(ChatFormatting.RED))
+                        .append(Component.literal(": ").withStyle(ChatFormatting.GRAY))
+                        .append(Component.literal(String.valueOf(JsonConfig.ORE_SONAR_SCAN_LIMIT.get().getAsInt())).withStyle(ChatFormatting.RED, ChatFormatting.BOLD))
+                        .append(Component.literal(" ores").withStyle(ChatFormatting.DARK_RED)));
+
+                tooltipComponents.add(Component.literal("  ◆ ").withStyle(ChatFormatting.DARK_GREEN)
+                        .append(Component.translatable("tooltip.blitz.ore_sonar_cooldown").withStyle(ChatFormatting.GREEN))
+                        .append(Component.literal(": ").withStyle(ChatFormatting.GRAY))
+                        .append(Component.literal(String.valueOf(JsonConfig.ORE_SONAR_COOLDOWN.get().getAsInt())).withStyle(ChatFormatting.GREEN, ChatFormatting.BOLD))
+                        .append(Component.literal(" ticks").withStyle(ChatFormatting.DARK_GREEN)));
+
+                tooltipComponents.add(Component.literal("━━━━━━━━━━━━━━━━━━━━━━━━━━━━").withStyle(ChatFormatting.DARK_GRAY));
+            } else {
+                tooltipComponents.add(Component.literal(""));
+                tooltipComponents.add(Component.literal("⌨ ").withStyle(ChatFormatting.DARK_GRAY)
+                        .append(Component.translatable("tooltip.blitz.ore_sonar_info").withStyle(ChatFormatting.YELLOW, ChatFormatting.ITALIC)));
+            }
+        }
     }
 
     protected void scanForOre(Level level, BlockPos originPos, Player player) {
@@ -181,7 +224,7 @@ public class OreSonarItem extends Item {
                 }
             }
 
-            shellPositions.sort(Comparator.comparingDouble(curPos -> curPos.angle));
+            shellPositions.sort(Comparator.comparingDouble(curPos -> curPos.angle)); // Ascending order -> spiral pattern
 
             for (PosWithAngle posData : shellPositions) {
                 BlockPos checkPos = posData.targetPos();

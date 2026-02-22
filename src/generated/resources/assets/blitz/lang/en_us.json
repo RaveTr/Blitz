@@ -10,5 +10,10 @@
   "config.blitz.standard_val_option": "%s - %s",
   "creative_mode_tab.blitz.items": "Blitz: Items",
   "item.blitz.ore_sonar": "Ore Sonar",
-  "item.blitz.rubble_hammer": "Rubble Hammer"
+  "item.blitz.rubble_hammer": "Rubble Hammer",
+  "tooltip.blitz.ore_sonar_cooldown": "Ore Sonar Cooldown",
+  "tooltip.blitz.ore_sonar_info": "Hold [SHIFT] or [CTRL] for details",
+  "tooltip.blitz.ore_sonar_scan_limit": "Ore Sonar Scan Limit",
+  "tooltip.blitz.ore_sonar_scan_radius": "Ore Sonar Scan Radius",
+  "tooltip.blitz.ore_sonar_stats": "Device Specs"
 }

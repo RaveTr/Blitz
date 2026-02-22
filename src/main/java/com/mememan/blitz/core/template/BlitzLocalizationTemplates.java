@@ -20,4 +20,13 @@ public final class BlitzLocalizationTemplates { // TODO Nexus v1.1.0 already sup
             .withAdditionalLocalizationKey("config.blitz.max_val_option", "%s - %s [Max]")
             .withAdditionalLocalizationKey("config.blitz.standard_val_option", "%s - %s")
             .buildAndGet();
+    public static final Object SONAR_TOOLTIP = new SpecializedLanguagePropertyWrapper<>(() -> Blocks.DIRT, Blitz.MOD_ID)
+            .builder()
+            .bypassDefaultTranslation()
+            .withAdditionalLocalizationKey("tooltip.blitz.ore_sonar_info", "Hold [SHIFT] or [CTRL] for details")
+            .withAdditionalLocalizationKey("tooltip.blitz.ore_sonar_stats", "Device Specs")
+            .withAdditionalLocalizationKey("tooltip.blitz.ore_sonar_scan_radius", "Ore Sonar Scan Radius")
+            .withAdditionalLocalizationKey("tooltip.blitz.ore_sonar_scan_limit", "Ore Sonar Scan Limit")
+            .withAdditionalLocalizationKey("tooltip.blitz.ore_sonar_cooldown", "Ore Sonar Cooldown")
+            .buildAndGet();
 }
